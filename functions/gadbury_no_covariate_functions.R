@@ -66,6 +66,7 @@ estimate_p_minus <- function(treatment,
   # Calculate sample statistics
   sigma_x_hat <- sd(treatment)
   sigma_y_hat <- sd(control)
+  # Set the average effect of treatment
   if(is.null(ATE)){
     mu_d_hat <- mean(treatment) - mean(control)
   } else{

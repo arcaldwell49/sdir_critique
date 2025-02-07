@@ -42,30 +42,47 @@ df %>%
               statistic = list(all_continuous() ~ "{mean} ({sd})"),
               digits = list(everything() ~ c(1)))
 
-# Model
+# Model -----
 
 model = lm(x1rm_change ~ x1rm_pre + sex + group,
            data = df) 
-summary(model)
-ggplot(df, aes(x=x1rm_pre,y=x1rm_change)) + geom_point()
+
+## EMMEANS -----
+# Get average treatment effect from estimated marginal means
+# NOTE: differs from paper which used bootstrap with BCa CI methods
 ATE = pairs(emmeans(model, ~ group)) %>% confint(level = .9)
 
-df %>%
-  group_by(group) %>%
-  summarize(pre_mean = mean(x1rm_pre,
-                            na.rm = TRUE),
-            pre_sd = sd(x1rm_pre,
-                       na.rm = TRUE),
-            post_mean = mean(x1rm_post,
-                             na.rm = TRUE),
-            post_sd = sd(x1rm_post,
-                         na.rm = TRUE),
-            change_mean = mean(x1rm_change,
-                               na.rm = TRUE),
-            change_sd = sd(x1rm_change,
-                          na.rm = TRUE),
-            .groups = 'drop')
 
+# Variance tests -------
+# 
+# Plot of change scores
+# 
+plot_delta = ggplot(df,
+                    aes(x=group,y=x1rm_change)) +
+  stat_dotsinterval(.width = .80)+
+  ggprism::theme_prism()
+
+
+library(skedastic)
+library(ggdist)
+# model.matrix(model)[,4]
+aux_model = model.matrix(~group, contrasts = list(group = "contr.treatment"), data = df)
+bp_test = breusch_pagan(model, 
+              auxdesign = aux_model,
+              koenker = FALSE)
+## Plot of residuals
+df$resid = residuals(model)
+
+plot_resid = ggplot(df,
+                    aes(x=group,y=resid)) +
+  stat_dotsinterval(.width = .80)+
+  ggprism::theme_prism()
+
+var.test(subset(df, group == "REPS")$x1rm_change,
+         subset(df, group == "LOAD")$x1rm_change)
+
+
+# Heterogeneity of Treatment Effects ----------
 var_d_mle <- sensitivity_analysis(subset(df, group == "REPS")$x1rm_change,
                                   subset(df, group == "LOAD")$x1rm_change,
                                   method = "mle")
