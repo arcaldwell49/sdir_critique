@@ -50,11 +50,13 @@ estimate_sigma_d <- function(treatment,
 #' Calculate probability of unfavorable treatment effect
 #' @param treatment Numeric vector of observations from treatment group
 #' @param control Numeric vector of observations from control group
+#' @param ATE Average treatment effect. A mean effect, like those from a ANCOVA, can be supplied in lieu of using the raw data
 #' @param rho_xy Correlation between potential outcomes (-1 to 1)
 #' @param conf.level Confidence level for intervals (default 0.95)
 #' @return List containing P- estimate and confidence interval
 estimate_p_minus <- function(treatment, 
                              control, 
+                             ATE = NULL,
                              rho_xy, 
                              conf.level = 0.95) {
   # Sample sizes
@@ -64,7 +66,12 @@ estimate_p_minus <- function(treatment,
   # Calculate sample statistics
   sigma_x_hat <- sd(treatment)
   sigma_y_hat <- sd(control)
-  mu_d_hat <- mean(treatment) - mean(control)
+  if(is.null(ATE)){
+    mu_d_hat <- mean(treatment) - mean(control)
+  } else{
+    mu_d_hat = ATE
+    }
+  
   
   # Get sigma_d estimates
   sigma_est <- estimate_sigma_d(treatment, control, rho_xy, conf.level)
@@ -136,12 +143,14 @@ bootstrap_sigma_d <- function(treatment,
 #' Sensitivity analysis across range of rho values
 #' @param treatment Numeric vector of observations from treatment group
 #' @param control Numeric vector of observations from control group
+#' @param ATE Average treatment effect. A mean effect, like those from a ANCOVA, can be supplied in lieu of using the raw data
 #' @param rho_seq Sequence of rho values to evaluate
 #' @param conf.level Confidence level for intervals
 #' @param method Either "mle" or "bootstrap"
 #' @param B Number of bootstrap samples if method="bootstrap", default is 1999.
 #' @return Data frame of estimates across rho values
 sensitivity_analysis <- function(treatment, control, 
+                                 ATE = NULL,
                                  rho_seq = seq(-1, 1, by = 0.1),
                                  conf.level = 0.95,
                                  method = "mle",

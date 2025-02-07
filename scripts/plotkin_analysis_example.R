@@ -4,6 +4,8 @@ library(flextable)
 library(gtsummary)
 library(emmeans)
 # Import Plotkin Data -----
+# # Data origin
+# https://doi.org/10.7717/peerj.14142
 source(
   here("scripts",
   "data_import.R")
@@ -28,7 +30,7 @@ df = df %>%
 
 # Summary statistics
 df %>%
-  select(group, x1rm_pre,
+  select(group, x1rm_pre, 
          x1rm_post,
          x1rm_change) %>%
   tbl_summary(by = group,
@@ -42,10 +44,11 @@ df %>%
 
 # Model
 
-model = lm(x1rm_change ~ x1rm_pre + group,
+model = lm(x1rm_change ~ x1rm_pre + sex + group,
            data = df) 
-
-ATE = pairs(emmeans(model, ~ group))
+summary(model)
+ggplot(df, aes(x=x1rm_pre,y=x1rm_change)) + geom_point()
+ATE = pairs(emmeans(model, ~ group)) %>% confint(level = .9)
 
 df %>%
   group_by(group) %>%

@@ -6,7 +6,7 @@
 df = read.csv(here::here("data",
                          "dataset.csv")) |>
   janitor::clean_names() |>
-  dplyr::select(code, group, x1rm_pre, x1rm_post) |>
+  dplyr::select(code, sex, group, x1rm_pre, x1rm_post) |>
   dplyr::mutate(x1rm_change = x1rm_post - x1rm_pre)
 
 
