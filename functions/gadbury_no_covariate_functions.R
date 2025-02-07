@@ -6,7 +6,10 @@
 #' @param rho_xy Correlation between potential outcomes (-1 to 1)
 #' @param conf.level Confidence level for intervals (default 0.95)
 #' @return List containing estimates and confidence intervals
-estimate_sigma_d <- function(treatment, control, rho_xy, conf.level = 0.95) {
+estimate_sigma_d <- function(treatment, 
+                             control, 
+                             rho_xy, 
+                             conf.level = 0.95) {
   # Sample sizes
   n1 <- length(treatment)
   n2 <- length(control)
@@ -50,7 +53,10 @@ estimate_sigma_d <- function(treatment, control, rho_xy, conf.level = 0.95) {
 #' @param rho_xy Correlation between potential outcomes (-1 to 1)
 #' @param conf.level Confidence level for intervals (default 0.95)
 #' @return List containing P- estimate and confidence interval
-estimate_p_minus <- function(treatment, control, rho_xy, conf.level = 0.95) {
+estimate_p_minus <- function(treatment, 
+                             control, 
+                             rho_xy, 
+                             conf.level = 0.95) {
   # Sample sizes
   n1 <- length(treatment)
   n2 <- length(control)
@@ -92,9 +98,13 @@ estimate_p_minus <- function(treatment, control, rho_xy, conf.level = 0.95) {
 #' @param control Numeric vector of observations from control group
 #' @param rho_xy Correlation between potential outcomes (-1 to 1)
 #' @param conf.level Confidence level for intervals (default 0.95)
-#' @param B Number of bootstrap samples (default 1000)
+#' @param B Number of bootstrap samples (default 1999)
 #' @return List containing bootstrap estimates and confidence intervals
-bootstrap_sigma_d <- function(treatment, control, rho_xy, conf.level = 0.95, B = 1999) {
+bootstrap_sigma_d <- function(treatment, 
+                              control,
+                              rho_xy, 
+                              conf.level = 0.95, 
+                              B = 1999) {
   n1 <- length(treatment)
   n2 <- length(control)
   
@@ -129,13 +139,13 @@ bootstrap_sigma_d <- function(treatment, control, rho_xy, conf.level = 0.95, B =
 #' @param rho_seq Sequence of rho values to evaluate
 #' @param conf.level Confidence level for intervals
 #' @param method Either "mle" or "bootstrap"
-#' @param B Number of bootstrap samples if method="bootstrap"
+#' @param B Number of bootstrap samples if method="bootstrap", default is 1999.
 #' @return Data frame of estimates across rho values
 sensitivity_analysis <- function(treatment, control, 
                                  rho_seq = seq(-1, 1, by = 0.1),
                                  conf.level = 0.95,
                                  method = "mle",
-                                 B = 1000) {
+                                 B = 1999) {
   
   results <- lapply(rho_seq, function(rho) {
     if(method == "mle") {
@@ -164,44 +174,3 @@ sensitivity_analysis <- function(treatment, control,
   
   do.call(rbind, results)
 }
-
-# Example usage with the alcohol intake data from Example 1
-alcohol_example <- function() {
-  # Data from Table 1
-  sst <- c(874, 389, 612, 798, 1152, 893, 541, 741, 1064, 862, 213)
-  control <- c(1042, 1617, 1180, 973, 1552, 1251, 1151, 1511, 728, 1079, 951, 1319)
-  
-  # Run sensitivity analysis
-  sens_mle <- sensitivity_analysis(sst, control, method = "mle")
-  sens_boot <- sensitivity_analysis(sst, control, method = "bootstrap")
-  
-  return(list(mle_results = sens_mle, bootstrap_results = sens_boot))
-}
-
-test = alcohol_example()
-
-library(tidyverse)
-# plot MLE results
-
-test$mle_results %>%
-  ggplot(aes(x=rho,y=sigma_d,
-             ymin = sigma_d_lower,
-             ymax = sigma_d_upper)) +
-  geom_hline(yintercept = 0, color="darkred", alpha = .8) +
-  geom_ribbon(fill = "grey",
-              alpha = .2) +
-  geom_line(linetype=4, #color = "red",
-            size = 1.1) +
-  ggprism::theme_prism()
-
-
-test$mle_results %>%
-  ggplot(aes(x=rho,y=p_minus,
-             ymin = p_minus_lower,
-             ymax = p_minus_upper)) +
-  geom_hline(yintercept = 0, color="darkred", alpha = .8) +
-  geom_ribbon(fill = "grey",
-              alpha = .2) +
-  geom_line(linetype=4, #color = "red",
-            size = 1.1) +
-  ggprism::theme_prism()
