@@ -17,7 +17,6 @@ estimate_sigma_d <- function(treatment,
   # Calculate sample statistics
   sigma_x_hat <- sd(treatment)
   sigma_y_hat <- sd(control)
-  mu_d_hat <- mean(treatment) - mean(control)
   
   # Estimate sigma_d^2
   sigma_d_sq_hat <- sigma_x_hat^2 + sigma_y_hat^2 - 
@@ -53,16 +52,19 @@ estimate_sigma_d <- function(treatment,
 #' @param ATE Average treatment effect. A mean effect, like those from a ANCOVA, can be supplied in lieu of using the raw data
 #' @param rho_xy Correlation between potential outcomes (-1 to 1)
 #' @param conf.level Confidence level for intervals (default 0.95)
+#' @param lower.tail determines whether the area under the normal distribution curve is returned to the left or right of a specified value.
+#'  Default is FALSE which infers higher scores in treatment group are positive (i.e., positivie ATE is good)
 #' @return List containing P- estimate and confidence interval
 estimate_p_minus <- function(treatment, 
                              control, 
                              ATE = NULL,
                              rho_xy, 
-                             conf.level = 0.95) {
+                             conf.level = 0.95,
+                             lower.tail = FALSE) {
   # Sample sizes
   n1 <- length(treatment)
   n2 <- length(control)
-  
+  lt = lower.tail
   # Calculate sample statistics
   sigma_x_hat <- sd(treatment)
   sigma_y_hat <- sd(control)
@@ -75,11 +77,15 @@ estimate_p_minus <- function(treatment,
   
   
   # Get sigma_d estimates
-  sigma_est <- estimate_sigma_d(treatment, control, rho_xy, conf.level)
+  sigma_est <- estimate_sigma_d(treatment = treatment, 
+                                control = control, 
+                                rho_xy = rho_xy, 
+                                conf.level = conf.level)
   sigma_d_hat <- sigma_est$sigma_d
   
   # Calculate P- (probability of unfavorable effect)
-  p_minus_hat <- pnorm(mu_d_hat/sigma_d_hat)
+  p_minus_hat <- pnorm(mu_d_hat/sigma_d_hat, lower.tail = lt)
+  
   
   # Calculate variance components (equation 5 from paper)
   var_mu_d <- sigma_x_hat^2/n1 + sigma_y_hat^2/n2
@@ -149,18 +155,28 @@ bootstrap_sigma_d <- function(treatment,
 #' @param conf.level Confidence level for intervals
 #' @param method Either "mle" or "bootstrap"
 #' @param B Number of bootstrap samples if method="bootstrap", default is 1999.
+#' @param lower.tail determines whether the area under the normal distribution curve is returned to the left or right of a specified value.
+#'  Default is FALSE which infers higher scores in treatment group are positive (i.e., positivie ATE is good)
 #' @return Data frame of estimates across rho values
 sensitivity_analysis <- function(treatment, control, 
                                  ATE = NULL,
                                  rho_seq = seq(-1, 1, by = 0.1),
                                  conf.level = 0.95,
                                  method = "mle",
-                                 B = 1999) {
+                                 B = 1999,
+                                 lower.tail = FALSE) {
   
   results <- lapply(rho_seq, function(rho) {
     if(method == "mle") {
-      sigma_d <- estimate_sigma_d(treatment, control, rho, conf.level)
-      p_minus <- estimate_p_minus(treatment, control, rho, conf.level)
+      sigma_d <- estimate_sigma_d(treatment = treatment, 
+                                  control = control, 
+                                  rho_xy = rho, 
+                                  conf.level = conf.level)
+      p_minus <- estimate_p_minus(treatment = treatment, 
+                                  control = control, ATE = ATE,
+                                  rho_xy = rho, 
+                                  conf.level = conf.level,
+                                  lower.tail = lower.tail)
       
       data.frame(
         rho = rho,

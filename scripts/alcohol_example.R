@@ -9,13 +9,15 @@ alcohol_example <- function() {
   control <- c(1042, 1617, 1180, 973, 1552, 1251, 1151, 1511, 728, 1079, 951, 1319)
   
   # Run sensitivity analysis
-  sens_mle <- sensitivity_analysis(sst, control, method = "mle")
+  sens_mle <- sensitivity_analysis(sst, control, method = "mle", lower.tail = TRUE)
   sens_boot <- sensitivity_analysis(sst, control, method = "bootstrap")
   
   return(list(mle_results = sens_mle, bootstrap_results = sens_boot))
 }
 
 test = alcohol_example()
+
+
 
 library(tidyverse)
 # plot MLE results

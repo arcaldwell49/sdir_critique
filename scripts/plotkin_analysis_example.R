@@ -3,12 +3,20 @@ library(here)
 library(flextable)
 library(gtsummary)
 library(emmeans)
+library(skedastic)
+library(ggdist)
 # Import Plotkin Data -----
 # # Data origin
 # https://doi.org/10.7717/peerj.14142
 source(
   here("scripts",
   "data_import.R")
+)
+
+# Import other functions -----
+source(
+  here("functions",
+       "var_functions.R")
 )
 # Import Gadbury functions ----
 source(
@@ -47,12 +55,14 @@ df %>%
 model = lm(x1rm_change ~ x1rm_pre + sex + group,
            data = df) 
 
+model_int = lm(x1rm_change ~ (x1rm_pre + sex) * group,
+           data = df) 
 ## EMMEANS -----
 # Get average treatment effect from estimated marginal means
 # NOTE: differs from paper which used bootstrap with BCa CI methods
 ATE = pairs(emmeans(model, ~ group)) %>% confint(level = .9)
 
-
+# pairs(emmeans(model_int, ~ group| sex)) %>% confint(level = .9)
 # Variance tests -------
 # 
 # Plot of change scores
@@ -63,8 +73,7 @@ plot_delta = ggplot(df,
   ggprism::theme_prism()
 
 
-library(skedastic)
-library(ggdist)
+
 # model.matrix(model)[,4]
 aux_model = model.matrix(~group, contrasts = list(group = "contr.treatment"), data = df)
 bp_test = breusch_pagan(model, 
@@ -78,15 +87,32 @@ plot_resid = ggplot(df,
   stat_dotsinterval(.width = .80)+
   ggprism::theme_prism()
 
-var.test(subset(df, group == "REPS")$x1rm_change,
-         subset(df, group == "LOAD")$x1rm_change)
+# F-test for log ratio of variance
+var_ratio_test = var.test(subset(df, group == "REPS")$x1rm_change,
+                          subset(df, group == "LOAD")$x1rm_change)
 
+lnvar_test = log_vr_test(
+  sd1 = sd(subset(df, group == "REPS")$x1rm_change, na.rm = TRUE),
+  sd2 = sd(subset(df, group == "LOAD")$x1rm_change, na.rm = TRUE),
+  n1 = length((subset(df, group == "REPS")$x1rm_change)),
+  n2 = length((subset(df, group == "LOAD")$x1rm_change))
+)
+
+sd_ir = diff_sdir_test(
+  sd1 = sd(subset(df, group == "REPS")$x1rm_change, na.rm = TRUE),
+  sd2 = sd(subset(df, group == "LOAD")$x1rm_change, na.rm =
+             TRUE),
+  n1 = length((subset(df, group == "REPS")$x1rm_change)),
+  n2 = length((subset(df, group == "LOAD")$x1rm_change))
+)
 
 # Heterogeneity of Treatment Effects ----------
-var_d_mle <- sensitivity_analysis(subset(df, group == "REPS")$x1rm_change,
-                                  subset(df, group == "LOAD")$x1rm_change,
-                                  method = "mle")
-var_d_mle %>%
+var_d_mle <- sensitivity_analysis(control = subset(df, group == "LOAD")$x1rm_change,
+                                  treatment = subset(df, group == "REPS")$x1rm_change,
+                                  ATE = -1*ATE$estimate[1],
+                                  method = "mle",
+                                  lower.tail = FALSE)
+plot_var_d_mle = var_d_mle %>%
   ggplot(aes(x=rho,y=sigma_d,
              ymin = sigma_d_lower,
              ymax = sigma_d_upper)) +
@@ -97,7 +123,7 @@ var_d_mle %>%
             linewidth = 1.1) +
   ggprism::theme_prism()
 
-var_d_mle %>%
+plot_pminus_mle = var_d_mle %>%
   ggplot(aes(x=rho,y=p_minus,
              ymin = p_minus_lower,
              ymax = p_minus_upper)) +
