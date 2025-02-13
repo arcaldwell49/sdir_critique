@@ -37,7 +37,7 @@ df = df %>%
   )
 
 # Summary statistics
-df %>%
+sum_table = df %>%
   select(group, x1rm_pre, 
          x1rm_post,
          x1rm_change) %>%
@@ -55,8 +55,7 @@ df %>%
 model = lm(x1rm_change ~ x1rm_pre + sex + group,
            data = df) 
 
-model_int = lm(x1rm_change ~ (x1rm_pre + sex) * group,
-           data = df) 
+
 ## EMMEANS -----
 # Get average treatment effect from estimated marginal means
 # NOTE: differs from paper which used bootstrap with BCa CI methods
@@ -70,6 +69,8 @@ ATE = pairs(emmeans(model, ~ group)) %>% confint(level = .9)
 plot_delta = ggplot(df,
                     aes(x=group,y=x1rm_change)) +
   stat_dotsinterval(.width = .80)+
+  labs(x = "",
+       y = "Change Score (Post - Pre)") +
   ggprism::theme_prism()
 
 
@@ -121,15 +122,29 @@ plot_var_d_mle = var_d_mle %>%
               alpha = .2) +
   geom_line(linetype=4, #color = "red",
             linewidth = 1.1) +
+  labs(x = expression(rho[LOAD*","*REPS]),
+       y = expression(s[D])) +
   ggprism::theme_prism()
 
 plot_pminus_mle = var_d_mle %>%
   ggplot(aes(x=rho,y=p_minus,
              ymin = p_minus_lower,
              ymax = p_minus_upper)) +
-  geom_hline(yintercept = 0, color="darkred", alpha = .8) +
+  geom_hline(yintercept = 0.5, color="darkred", alpha = .8) +
   geom_ribbon(fill = "grey",
               alpha = .2) +
   geom_line(linetype=4, #color = "red",
             linewidth = 1.1) +
+  labs(x = expression(rho[LOAD*","*REPS]),
+       y = expression(P[harmed])) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0.2, 1, .2))+
   ggprism::theme_prism()
+
+library(patchwork)
+
+p_final = plot_var_d_mle / plot_pminus_mle + plot_annotation(tag_levels = 'A')
+
+ggsave(here("figure1.png"),
+       height = 7.5,
+       width = 7.5)

@@ -1,0 +1,183 @@
+---
+title: "Supplementary Material"
+subtitle: "Summary of Results of Plotkin et al 2022"
+author: "Aaron R. Caldwell"
+format: 
+  pdf:
+    toc: true
+    link-citations: true
+execute:
+  warning: false
+  messages: false
+  echo: false
+editor: source
+bibliography: references.bib
+editor_options: 
+  chunk_output_type: console
+---
+
+\newpage
+
+# Scripts and Accessibility
+
+This reproducible analysis document runs source scripts. These can be found on the independent, version-controlled, data repository for this project.
+
+```{r}
+
+source(
+  here::here("scripts",
+  "plotkin_analysis_example.R")
+)
+```
+
+# Introduction
+
+This document is a short summary of the re-analysis of the 1-RM back squat outcome that was reported in the manuscript of @plotkin2022. For this re-analysis, we replicate the model presented in the manuscript wherein the change score was the outcome, the independent variable was the training group (LOAD vs REPS), and two covariates (sex and pre-intervention 1-RM) were included in the model.
+
+We present the average treatment effect using the estimated marginal means using the `emmeans` R package [@emmeans]. Following this, we present various tests of heteroskedasticity and the bounds for the heterogeneity of treatment effects [@gadbury2001].
+
+\newpage
+
+# Summary Statistics
+
+This match the publication, barring one SD which appears to be a typo in the original publication[^1]
+
+[^1]: The delta in the LOAD group is incorrectly presented as 21.2 rather than 12.2 in Table 1 of @plotkin2022
+
+```{r}
+sum_table %>%
+  as_flex_table() %>%
+  flextable::theme_apa()
+```
+
+## Plot of Change Scores
+
+```{r}
+plot_delta
+```
+
+\newpage
+
+# Model Summary
+
+Note: pre-scores not centered or scaled.
+
+```{r}
+model %>%
+  as_flextable()
+```
+
+\newpage
+
+# Average Treatment Effect
+
+The average treatment effect can be provided by a contrast using the estimated marginal means (`emmeans` package). The differences differ slightly from the publication because we utilize a parametric model while the original authors calculated confidence intervals using bootstrap methods.
+
+```{r}
+ATE %>%
+  tibble() %>%
+  flextable()
+```
+
+\newpage
+
+# Tests for Heteroskedasticity
+
+The results of the different tests are mostly in agreement. However, note that the $s_{IR}$ (last test) is negative which, under the logic of $s_{IR}$ proponents, would end any further investigation of heterogeneity of treatment effects. Additionally, none of the tests are "significant", but such tests would be quite underpowered given the study's sample size.
+
+## Breusch-Pagan Test (Model Residuals)
+
+```{r}
+bp_test
+```
+
+## Variance Ratio Test
+
+```{r}
+var_ratio_test
+```
+
+\newpage
+
+## Log Variability (SD) Test
+
+```{r}
+lnvar_test
+```
+
+## Standard Deviation of Individual Response
+
+```{r}
+sd_ir
+```
+
+\newpage
+
+# Bounds on HTE
+
+We can then use the work of @gadbury2001 to get the bounds on standard deviation of the treatment effect. A figure and table of the results are below. The average treatment from the model was utilized to calculate the $P_{harmed}$. Also, we opted to use the method of creating bounds that does *not* utilize covariate information, but the code to do such an analysis is included on our independent repository.
+
+## Method to calculate $s_D$ and its confidence intervals:
+
+Let:
+
+- $n_x$ = size of treatment group
+- $n_y$ = size of control group
+- $\hat{\sigma}_x$ = sample standard deviation of treatment group
+- $\hat{\sigma}_y$ = sample standard deviation of control group
+- $\rho_{xy}$ = correlation between treatment and control measurements
+
+The standard deviation of individual responses ($\hat{\sigma}_D$) is estimated as follows:
+
+$\hat{\sigma}_D^2 = \hat{\sigma}_x^2 + \hat{\sigma}_y^2 - 2\hat{\sigma}_x\hat{\sigma}_y\rho_{xy}$
+
+The variance of this estimate is given by:
+$Var(\hat{\sigma}_d^2) = 2\left[\frac{\hat{\sigma}_x^2}{n_x}(\hat{\sigma}_x - \rho_{xy}\hat{\sigma}_y)^2 + \frac{\hat{\sigma}_y^2}{n_y}(\hat{\sigma}_y - \rho_{xy}\hat{\sigma}_x)^2\right]$
+
+For a confidence level of $1-\alpha$, the confidence interval is constructed as:
+
+$\hat{\sigma}_D^2 \pm z_{1-\alpha/2}\sqrt{Var(\hat{\sigma}_d^2)}$
+
+where $z_{1-\alpha/2}$ is the critical value from the standard normal distribution.
+
+The final estimate of the standard deviation of individual responses and its confidence interval are obtained by taking the square root:
+$\hat{\sigma}_D = \sqrt{|\hat{\sigma}_D^2|} \cdot sign(\hat{\sigma}_D^2)$
+
+For the confidence interval bounds:
+
+$CI_{lower,upper} = \sqrt{|\hat{\sigma}d^2 \pm z{1-\alpha/2}\sqrt{Var(\hat{\sigma}_d^2)}|} \cdot sign(\hat{\sigma}d^2 \pm z{1-\alpha/2}\sqrt{Var(\hat{\sigma}_d^2)})$
+
+\newpage
+
+## Method to calculate $P_{harmed}$ and its confidence intervals:
+
+
+
+\newpage
+
+## Visualization of $s_D$ and $P_{harmed}$
+
+```{r}
+#| fig-height: 7
+#| fig-width: 6.5
+p_final
+```
+
+\newpage
+
+## Table of Bounds
+
+```{r}
+
+var_d_mle %>%
+  flextable() %>%
+  flextable::padding(padding.bottom = 0,padding.top = 0, part = "all") %>%
+  line_spacing(part = "body", space = 1.1) %>%
+  theme_apa()  %>% 
+  fontsize(part = "all",
+       size =8)
+```
+
+\newpage
+
+# References
