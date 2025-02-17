@@ -50,6 +50,7 @@ estimate_sigma_d <- function(treatment,
 #' @param treatment Numeric vector of observations from treatment group
 #' @param control Numeric vector of observations from control group
 #' @param ATE Average treatment effect. A mean effect, like those from a ANCOVA, can be supplied in lieu of using the raw data
+#' @param ATE_SE Standard error of the ATE.
 #' @param rho_xy Correlation between potential outcomes (-1 to 1)
 #' @param conf.level Confidence level for intervals (default 0.95)
 #' @param lower.tail determines whether the area under the normal distribution curve is returned to the left or right of a specified value.
@@ -58,6 +59,7 @@ estimate_sigma_d <- function(treatment,
 estimate_p_minus <- function(treatment, 
                              control, 
                              ATE = NULL,
+                             ATE_SE = NULL,
                              rho_xy, 
                              conf.level = 0.95,
                              lower.tail = FALSE) {
@@ -88,7 +90,12 @@ estimate_p_minus <- function(treatment,
   
   
   # Calculate variance components (equation 5 from paper)
-  var_mu_d <- sigma_x_hat^2/n1 + sigma_y_hat^2/n2
+  if(is.null(ATE_SE)){
+    var_mu_d <- sigma_x_hat^2/n1 + sigma_y_hat^2/n2
+  } else{
+    var_mu_d = ATE_SE^2
+  }
+
   phi_term <- dnorm(mu_d_hat/sigma_d_hat)
   
   var_p_minus <- (phi_term^2/sigma_d_hat^2) * (
@@ -160,6 +167,7 @@ bootstrap_sigma_d <- function(treatment,
 #' @return Data frame of estimates across rho values
 sensitivity_analysis <- function(treatment, control, 
                                  ATE = NULL,
+                                 ATE_SE = NULL,
                                  rho_seq = seq(-1, 1, by = 0.1),
                                  conf.level = 0.95,
                                  method = "mle",
@@ -174,6 +182,7 @@ sensitivity_analysis <- function(treatment, control,
                                   conf.level = conf.level)
       p_minus <- estimate_p_minus(treatment = treatment, 
                                   control = control, ATE = ATE,
+                                  ATE_SE = NULL,
                                   rho_xy = rho, 
                                   conf.level = conf.level,
                                   lower.tail = lower.tail)

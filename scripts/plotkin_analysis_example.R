@@ -54,7 +54,7 @@ sum_table = df %>%
 
 model = lm(x1rm_change ~ x1rm_pre + sex + group,
            data = df) 
-
+ 
 
 ## EMMEANS -----
 # Get average treatment effect from estimated marginal means
@@ -111,6 +111,7 @@ sd_ir = diff_sdir_test(
 var_d_mle <- sensitivity_analysis(control = subset(df, group == "LOAD")$x1rm_change,
                                   treatment = subset(df, group == "REPS")$x1rm_change,
                                   ATE = -1*ATE$estimate[1],
+                                  ATE_SE = ATE$SE[1],
                                   method = "mle",
                                   lower.tail = FALSE)
 plot_var_d_mle = var_d_mle %>%

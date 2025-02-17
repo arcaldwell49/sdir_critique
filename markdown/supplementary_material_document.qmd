@@ -151,7 +151,37 @@ $CI_{lower,upper} = \sqrt{|\hat{\sigma}d^2 \pm z{1-\alpha/2}\sqrt{Var(\hat{\sigm
 
 ## Method to calculate $P_{harmed}$ and its confidence intervals:
 
+Let's define the additional variables:
 
+- $\hat{\mu}_D$ = estimated mean treatment effect
+- $\hat{\sigma}_D$ = estimated standard deviation of individual responses
+- $\phi(\cdot)$ = standard normal probability density function
+- $\Phi(\cdot)$ = standard normal cumulative distribution function
+
+The probability of harm (unfavorable effect) is estimated as:
+
+$\hat{P}_{harmed} = \Phi\left(\frac{\hat{\mu}_D}{\hat{\sigma}_D}\right)$
+
+The variance of this estimate requires several components.
+
+First, the variance of the mean treatment effect:
+
+$Var(\hat{\mu}_D) = \frac{\hat{\sigma}_x^2}{n_1} + \frac{\hat{\sigma}_y^2}{n_2}$
+
+Then, using the delta method, the variance of $\hat{P}_{-}$ is:
+
+$Var(\hat{P}_{harmed}) = \frac{\phi^2(\hat{\mu}_D/\hat{\sigma}_D)}{\hat{\sigma}_D^2}\left[Var(\hat{\mu}_D) + \frac{\hat{\mu}_D^2 \cdot Var(\hat{\sigma}_D^2)}{4\hat{\sigma}_D^4}\right]$
+
+where $\phi(\hat{\mu}_D/\hat{\sigma}_D)$ is the standard normal density evaluated at $\hat{\mu}_D/\hat{\sigma}_D$
+
+For a confidence level of $1-\alpha$, the confidence interval is constructed as:
+
+$\hat{P}_{harmed} \pm z_{1-\alpha/2}\sqrt{Var(\hat{P}_{harmed})}$
+
+where $z_{1-\alpha/2}$ is the critical value from the standard normal distribution.
+This formulation provides an estimate of the probability that an individual will experience an unfavorable response to treatment, along with uncertainty bounds around that estimate.
+
+*Note*: The confidence interval bounds should be constrained to [0,1] since we are estimating a probability. However, as we can see in the visualizations, with small sample sizes this approach can produce bounds outside the interval.
 
 \newpage
 
