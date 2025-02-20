@@ -32,7 +32,7 @@ source(
 
 # Introduction
 
-This document is a short summary of the re-analysis of the 1-RM back squat outcome that was reported in the manuscript of @plotkin2022. For this re-analysis, we replicate the model presented in the manuscript wherein the change score was the outcome, the independent variable was the training group (LOAD vs REPS), and two covariates (sex and pre-intervention 1-RM) were included in the model.
+This document is a short summary of the re-analysis of the 1-RM back squat outcome that was reported in the manuscript of @plotkin2022. For this re-analysis, we replicate the model presented in the manuscript wherein the change score was the outcome, the independent variable was the training group (LOAD vs REPS), and two covariates (sex and pre-intervention 1-RM) were included in the model. The results slightly differ because we do not use the bootstrapping method mentioned in the original manuscript.
 
 We present the average treatment effect using the estimated marginal means using the `emmeans` R package [@emmeans]. Following this, we present various tests of heteroskedasticity and the bounds for the heterogeneity of treatment effects [@gadbury2001].
 
