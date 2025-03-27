@@ -4,7 +4,7 @@
 
 # Set seed for reproducibility
 set.seed(12345)
-library(simstudy)
+#library(simstudy)
 # Function to generate data using the potential outcomes framework
 # Parameters:
 #   n_subjects: number of subjects
@@ -23,8 +23,8 @@ simulate_potential_outcomes <- function(n_subjects = 200,
   # Y(1) is the potential outcome under treatment
   #n_subjects2 = n_subjects*2
   # First, generate uncorrelated normal random variables
-  z1 <- rnorm(n_subjects2, mean = 0, sd = 1)
-  z2 <- rnorm(n_subjects2, mean = 0, sd = 1)
+  z1 <- rnorm(n_subjects, mean = 0, sd = 1)
+  z2 <- rnorm(n_subjects, mean = 0, sd = 1)
   
   # Create correlation by combining the uncorrelated variables
   # Y(0) = standard normal
