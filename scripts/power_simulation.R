@@ -128,7 +128,7 @@ ggplot(results_wide, aes(x = sample_size, y = difference_f_sdir)) +
   labs(
     title = "Difference in Power between F-test and SDir",
     x = "Sample Size",
-    y = "Difference in Power (Variance Ratio F-test - SDir",
+    y = "Difference in Power (Variance Ratio F-test - SDir)",
     color = "Test"
   ) +
   geom_hline(yintercept = 0)+

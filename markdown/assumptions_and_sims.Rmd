@@ -1,5 +1,9 @@
 ---
 title: "Assumptions of the SDir Method"
+subtitle: "Simulations Supported Evaluation SDir"
+author:   
+  - Andrew D. Vigotsky
+  - Aaron R. Caldwell
 output: pdf_document
 date: "`r Sys.Date()`"
 ---
