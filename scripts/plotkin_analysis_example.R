@@ -5,6 +5,8 @@ library(gtsummary)
 library(emmeans)
 library(skedastic)
 library(ggdist)
+library(distributional)
+library(patchwork)
 # Import Plotkin Data -----
 # # Data origin
 # https://doi.org/10.7717/peerj.14142
@@ -142,6 +144,45 @@ plot_pminus_mle = var_d_mle %>%
                      breaks = seq(0.2, 1, .2))+
   ggprism::theme_prism()
 
+
+library(ggdist)
+
+indiv_level_plot = var_d_mle %>%
+  mutate(ATE = ATE$estimate[[1]]) %>%
+  ggplot(aes(x = rho, ydist = dist_normal(ATE, sigma_d))) +
+  stat_lineribbon( .width = c(.5, .75, .9, .95, .98, .99)) +
+  scale_fill_brewer()+
+  ggprism::theme_prism()+
+  labs(x = expression(rho[LOAD*","*REPS]),
+       fill = "Quantile",
+       y = "Difference in 1-RM back squat (kg)") 
+
+df_long <- var_d_mle %>%
+  pivot_longer(
+    cols = c("sigma_d", "sigma_d_lower", "sigma_d_upper"),
+    names_to = "sigma",
+    values_to = "SD"
+  ) %>%
+  mutate(sigma_level = factor(case_when(
+    sigma == "sigma_d" ~ .5,
+    sigma == "sigma_d_upper" ~ .975,
+    sigma == "sigma_d_lower" ~ .025
+  )),ordered=TRUE)
+
+indiv_level_plot2 = df_long %>%
+  mutate(ATE = ATE$estimate[[1]]) %>%
+  filter(rho %in% seq(-1,1,.5)) %>%
+  filter(SD > 0) %>%
+  ggplot(aes(x = rho, color = sigma_level, ydist = dist_normal(ATE, SD))) +
+  stat_slab(fill=NA) +
+ scale_color_viridis_d()+
+  ggprism::theme_prism()+
+  scale_x_continuous(breaks = seq(-1, 1, .5))+
+  labs(x = expression(rho[LOAD*","*REPS]),
+       color = "Confidence Interval Level",
+       y = "Difference in 1-RM back squat (kg)") 
+
+
 library(patchwork)
 
 p_final = plot_var_d_mle / plot_pminus_mle + plot_annotation(tag_levels = 'A')
@@ -149,3 +190,14 @@ p_final = plot_var_d_mle / plot_pminus_mle + plot_annotation(tag_levels = 'A')
 ggsave(here("figure1.png"),
        height = 7.5,
        width = 7.5)
+
+p_final2 = indiv_level_plot / indiv_level_plot2 + plot_annotation(tag_levels = 'A')
+
+ggsave(here("figure2.png"),
+       height = 7.5,
+       width = 7.5)
+
+p_final3 = (plot_var_d_mle + indiv_level_plot) / (plot_pminus_mle + indiv_level_plot2) + plot_annotation(tag_levels = 'A')
+ggsave(here("figure1_alt.png"),
+       height = 7.5,
+       width = 10)
