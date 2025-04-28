@@ -168,6 +168,7 @@ colMeans( do.call(rbind, sims) )
 
 ```
 
+\newpage
 
 # Consideration of Statistical Power
 

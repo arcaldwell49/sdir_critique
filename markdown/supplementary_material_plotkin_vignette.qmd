@@ -22,7 +22,7 @@ editor_options:
 
 This reproducible analysis document runs source scripts. These can be found on the independent, version-controlled, data repository for this project.
 
-```{r}
+```{r setup}
 
 source(
   here::here("scripts",
@@ -192,6 +192,19 @@ This formulation provides an estimate of the probability that an individual will
 #| fig-width: 6.5
 p_final
 ```
+
+\newpage
+
+## Visualization of Individual Level Effect
+
+The standard deviation of treatment effect could also be plotted along with the average treatment effect to see the distribution of the potential individual level treatment effect.
+
+```{r}
+#| fig-height: 7
+#| fig-width: 6.5
+p_final2
+```
+
 
 \newpage
 
