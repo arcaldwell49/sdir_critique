@@ -108,7 +108,10 @@ sd_ir = diff_sdir_test(
   n1 = length((subset(df, group == "REPS")$x1rm_change)),
   n2 = length((subset(df, group == "LOAD")$x1rm_change))
 )
-
+# assumed rho_xy
+sd1 = sd(subset(df, group == "REPS")$x1rm_change, na.rm = TRUE)
+sd2 = sd(subset(df, group == "LOAD")$x1rm_change, na.rm =TRUE)
+sdir_rho_xy = (sd1^2 + sd2^2 - unname(sd_ir$estimate)^2) / (2 * sd1 * sd2)
 # Heterogeneity of Treatment Effects ----------
 var_d_mle <- sensitivity_analysis(control = subset(df, group == "LOAD")$x1rm_change,
                                   treatment = subset(df, group == "REPS")$x1rm_change,
@@ -121,6 +124,9 @@ plot_var_d_mle = var_d_mle %>%
              ymin = sigma_d_lower,
              ymax = sigma_d_upper)) +
   geom_hline(yintercept = 0, color="darkred", alpha = .8) +
+  geom_vline(xintercept = sdir_rho_xy, 
+             linetype = "dotdash",
+             color="forestgreen", alpha = .8) +
   geom_ribbon(fill = "grey",
               alpha = .2) +
   geom_line(linetype=4, #color = "red",
@@ -134,6 +140,9 @@ plot_pminus_mle = var_d_mle %>%
              ymin = p_minus_lower,
              ymax = p_minus_upper)) +
   geom_hline(yintercept = 0.5, color="darkred", alpha = .8) +
+  geom_vline(xintercept = sdir_rho_xy, 
+             linetype = "dotdash",
+             color="forestgreen", alpha = .8) +
   geom_ribbon(fill = "grey",
               alpha = .2) +
   geom_line(linetype=4, #color = "red",
@@ -151,6 +160,9 @@ indiv_level_plot = var_d_mle %>%
   mutate(ATE = ATE$estimate[[1]]) %>%
   ggplot(aes(x = rho, ydist = dist_normal(ATE, sigma_d))) +
   stat_lineribbon( .width = c(.5, .75, .9, .95, .98, .99)) +
+  geom_vline(xintercept = sdir_rho_xy, 
+             linetype = "dotdash",
+             color="forestgreen", alpha = .8) +
   scale_fill_brewer()+
   ggprism::theme_prism()+
   labs(x = expression(rho[LOAD*","*REPS]),
@@ -174,6 +186,9 @@ indiv_level_plot2 = df_long %>%
   filter(rho %in% seq(-1,1,.5)) %>%
   filter(SD > 0) %>%
   ggplot(aes(x = rho, color = sigma_level, ydist = dist_normal(ATE, SD))) +
+  geom_vline(xintercept = sdir_rho_xy, 
+             linetype = "dotdash",
+             color="forestgreen", alpha = .8) +
   stat_slab(fill=NA) +
  scale_color_viridis_d()+
   ggprism::theme_prism()+
@@ -187,7 +202,7 @@ library(patchwork)
 
 p_final = plot_var_d_mle / plot_pminus_mle + plot_annotation(tag_levels = 'A')
 
-ggsave(here("figure1.png"),
+ggsave(here("figure1_alt.png"),
        height = 7.5,
        width = 7.5)
 
@@ -198,6 +213,6 @@ ggsave(here("figure2.png"),
        width = 7.5)
 
 p_final3 = (plot_var_d_mle + indiv_level_plot) / (plot_pminus_mle + indiv_level_plot2) + plot_annotation(tag_levels = 'A')
-ggsave(here("figure1_alt.png"),
+ggsave(here("figure1.png"),
        height = 7.5,
        width = 10)
