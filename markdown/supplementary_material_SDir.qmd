@@ -75,15 +75,16 @@ for(i in 1:nsim) {
 
 hist(sim.out,breaks="fd")
 abline(v=sdir, col="red")
-print(mean(sim.out))
+print(paste("True SD of treatment effects:",sdir))
+print(paste("SDir estimate:",mean(sim.out)))
 
 ```
 
 ## When are $\text{SD}_\text{ir}$'s assumptions unreasonable?
 
-We'll now turn to an example in which the SDir assumptions do not hold. Suppose adaptations to a single training session are defined by the impulse-response function (left), and repeated exercise sessions result in cumulative adaptation (right).
+We'll now turn to an example in which the $\text{SD}_\text{ir}$ assumptions do not hold. Suppose adaptations to a single training session are defined by the impulse-response function (left), and repeated exercise sessions result in cumulative adaptation (right).
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, out.height="20%"}
 library(patchwork)
 library(ggplot2)
 
@@ -109,34 +110,38 @@ ggplot() +
   xlab("Time (days)")
 ```
 
-We would like to study the effects of exercising approximately three times per week relative to no exercise. We will recruit from the general population, meaning that the individuals recruited will have varying levels of training experience. This training experience is defined by the frequency of training, in which participant $i$'s probability of training on a given day is $p_i \sim \text{Beta}(0.4,0.8)$; the cumulative training effect from the 500 days before enrollment was then simulated and used as the pre-intervention score.
+We would like to study the effects of exercising approximately three times per week relative to no exercise. We will recruit from the general population, meaning that the individuals recruited will have (a) variable baselines, (b) variable training effects, and (c) varying levels of training experience. (a) and (b) will be modeled jointly using a multivariate log-normal distribution, which assumes that baseline levels (without any training) and adaptations are correlated. Finally, (c) training experience was modeled using the frequency of training, in which participant $i$'s probability of training on a given day is $p_i \sim \text{Beta}(0.4,0.8)$; the cumulative training effect from the 500 days before enrollment was then simulated and used as the pre-intervention score.
 
-When participant $i$ is randomized, they will either exercise with a probability of $\frac{3}{7}$ (intervention) or $0$ (control) for 60 days. Thus, those who were well-trained prior to enrollment will experience little-to-no change (intervention) or detraining effects (control). Conversely, those who were untrained prior to enrollment will experience training effects (intervention) or little-to-no change (control).
+When participant $i$ is randomized, they will either exercise every other day (intervention) or not at all (control) for 60 days. Thus, those who were well-trained prior to enrollment will experience little-to-no change (intervention) or detraining effects (control). Conversely, those who were untrained prior to enrollment will experience training effects (intervention) or little-to-no change (control).
 
 ```{r}
-sims <- pbmcapply::pbmclapply(1:50, function(x) {
+sims <- pbmcapply::pbmclapply(1:500, function(x) {
   nsub <- 500
   probs <- rbeta(nsub, 0.4, 0.8)
+  chars <- exp(MASS::mvrnorm(nsub,c(2,1),matrix(c(.25,0.125,0.125,0.25),2,2)))
   df <- c()
   for(i in 1:nsub) {
+    baseline <- chars[i,1]
+    a <- chars[i,2]
+    
     trained <- rbinom(500,1,probs[i])
     
-    trained0 <- c(trained,rbinom(60,1,0))
-    trained1 <- c(trained,rbinom(60,1,3/7))
+    trained0 <- c(trained,rep(0,60))
+    trained1 <- c(trained,rep(c(0,1),length.out=60))
     
     ts <- 1:length(trained0)
+    N <- length(ts)
     
     convolved0 <- pracma::conv(
-      irf(ts, 5, 30, 40), 
+      irf(ts, a, 30, 40), 
       trained0
-    )[1:length(ts)]
+    )[1:N] + baseline
     
     convolved1 <- pracma::conv(
-      irf(ts, 5, 30, 40), 
+      irf(ts, a, 30, 40), 
       trained1
-    )[1:length(ts)]
+    )[1:N] + baseline
     
-    N <- length(ts)
     
     df <- rbind(df, data.frame(id = i,
                                group = as.numeric(i > nsub/2),
@@ -149,18 +154,13 @@ sims <- pbmcapply::pbmclapply(1:50, function(x) {
   df$delta <- df$post - df$pre
   
   control <- subset(df, group == 0)
-  exp <- subset(df, group == 1)
+  exper <- subset(df, group == 1)
   
-  plot(df$post0-df$pre, df$post1-df$pre)
-  
-  #summary(lm(post ~ pre + group, df))
-  
-  # double-check this output!
   data.frame(
-    var_ir = var(exp$delta) - var(control$delta),
+    var_ir = var(exper$delta) - var(control$delta),
     varD = var( (df$post1-df$pre) - (df$post0-df$pre) ),
-    rho = cor( df$post0-df$pre , df$post1-df$pre ), # correlation between deltas
-    rho1 = cor( (df$post0-df$pre) , df$post1-(df$post0-df$pre) ) # correlation between control delta and intervention effect
+    rho = cor( df$post0-df$pre , df$post1-df$pre ),
+    rho1 = cor( df$post0-df$pre , df$post1-df$post0 ) 
     )
 }, mc.cores = 8)
 
