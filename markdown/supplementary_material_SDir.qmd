@@ -44,7 +44,7 @@ What does $\rho_{\alpha,\gamma}=0$ imply about the correlation between counterfa
     \implies \sigma_\gamma^2 &= \sigma_\beta^2 + \sigma_\alpha^2 - 2\,\rho_{\beta,\alpha}\,\sigma_\beta\,\sigma_\alpha \\
     \implies \sigma_\beta^2 - \sigma_\alpha^2 &= \sigma_\beta^2 + \sigma_\alpha^2 - 2\,\rho_{\beta,\alpha}\,\sigma_\beta\,\sigma_\alpha \\
     \implies \rho_{\beta,\alpha} &= \frac{\sigma_\alpha}{\sigma_\beta} \\
-\end{align*} This is a strong assumption. First, it implies that negative correlations between potential outcomes are ~impossible~, but there are reasonable cases when they can be expected (see below). Second, it implies that the treatment effect ($\gamma$) is orthogonal to the control effect ($\alpha$), which may be a reasonable assumption in some but certainly not all experiments. Here, our goal is to dissect this assumption to provide a couple of examples of when it may and may not hold.
+\end{align*} This is a strong assumption. First, it implies that negative correlations between potential outcomes are _impossible_, but there are reasonable cases when they can be expected (see below). Second, it implies that the treatment effect ($\gamma$) is orthogonal to the control effect ($\alpha$), which may be a reasonable assumption in some but certainly not all experiments. Here, our goal is to dissect this assumption to provide a couple of examples of when it may and may not hold.
 
 ## When are $\text{SD}_\text{ir}$'s assumptions reasonable?
 
@@ -173,7 +173,7 @@ colMeans( do.call(rbind, sims) )
 # Consideration of Statistical Power
 
 
-These simulations compares the statistical power of three different approaches for detecting treatment response heterogeneity:
+These simulations compare the statistical power of three different approaches for detecting treatment response heterogeneity:
 
 - `diff_sdir_test`: Standard deviation of individual responses ($\text{SD}_\text{ir}$) test
 - `log_vr_test`: Log variance ratio test
@@ -217,5 +217,5 @@ The simulation explored various sample sizes (10-100 per group) and variance rat
 2. Variance ratio detection thresholds:
 - Variance ratios of 1.5 or lower are difficult to detect reliably unless sample sizes are large
 - Variance ratios of 2.0 or higher can be detected with good power (>80%) with sample sizes of 50+ per group
-3. Test selection: While the traditional F-test shows slight advantages in some scenarios, its power disadvantage diminishes with increasing sample size.
+3. Test selection: While the traditional F-test shows slight advantages in some scenarios, its power advantage diminishes with increasing sample size.
 4. Planning studies: Researchers interested in treatment response heterogeneity should consider these power analyses when planning study sample sizes, especially if moderate heterogeneity effects are anticipated. Studies intending to detect TRH *should be substantially larger than the average exercise physiology study*.

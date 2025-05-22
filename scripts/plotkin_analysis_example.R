@@ -132,7 +132,7 @@ plot_var_d_mle = var_d_mle %>%
   geom_line(linetype=4, #color = "red",
             linewidth = 1.1) +
   labs(x = expression(rho[LOAD*","*REPS]),
-       y = expression(SD[TE])) +
+       y = expression(SD[D])) +
   ggprism::theme_prism()
 
 plot_pminus_mle = var_d_mle %>%

@@ -40,7 +40,7 @@ We present the average treatment effect using the estimated marginal means using
 
 # Summary Statistics
 
-This match the publication, barring one SD which appears to be a typo in the original publication[^1]
+This matches the publication, barring one SD which appears to be a typo in the original publication[^1]
 
 [^1]: The delta in the LOAD group is incorrectly presented as 21.2 rather than 12.2 in Table 1 of @plotkin2022
 
@@ -83,7 +83,7 @@ ATE %>%
 
 # Tests for Heteroskedasticity
 
-The results of the different tests are mostly in agreement. However, note that the $s_{IR}$ (last test) is negative which, under the logic of $s_{IR}$ proponents, would end any further investigation of heterogeneity of treatment effects. Additionally, none of the tests are "significant", but such tests would be quite underpowered given the study's sample size.
+The results of the different tests are mostly in agreement. However, note that the $SD_{ir}$ (last test) is negative which, under the logic of $SD_{ir}$ proponents, would end any further investigation of heterogeneity of treatment effects. Additionally, none of the tests are "significant", but such tests would be quite underpowered given the study's sample size.
 
 ## Breusch-Pagan Test (Model Residuals)
 
@@ -113,11 +113,11 @@ sd_ir
 
 \newpage
 
-# Bounds on HTE
+# Bounds on TRH
 
-We can then use the work of @gadbury2001 to get the bounds on standard deviation of the treatment effect. A figure and table of the results are below. The average treatment from the model was utilized to calculate the $P_{harmed}$. Also, we opted to use the method of creating bounds that does *not* utilize covariate information, but the code to do such an analysis is included on our independent repository.
+We can then use the work of @gadbury2001 to get the bounds on standard deviation of the treatment effect (i.e., treatment response heterogeneity: TRH). A figure and table of the results are below. The average treatment from the model was utilized to calculate the $P_{harmed}$. Also, we opted to use the method of creating bounds that does *not* utilize covariate information, but the code to do such an analysis is included on our independent repository.
 
-## Method to calculate $s_D$ and its confidence intervals:
+## Method to calculate $SD_D$ and its confidence intervals:
 
 Let:
 
