@@ -200,17 +200,17 @@ indiv_level_plot2 = df_long %>%
 
 library(patchwork)
 
-p_final = plot_var_d_mle / plot_pminus_mle + plot_annotation(tag_levels = 'A')
-
-ggsave(here("figure1_alt.png"),
-       height = 7.5,
-       width = 7.5)
-
-p_final2 = indiv_level_plot / indiv_level_plot2 + plot_annotation(tag_levels = 'A')
-
-ggsave(here("figure2.png"),
-       height = 7.5,
-       width = 7.5)
+# p_final = plot_var_d_mle / plot_pminus_mle + plot_annotation(tag_levels = 'A')
+# 
+# ggsave(here("figure1_alt.png"),
+#        height = 7.5,
+#        width = 7.5)
+# 
+# p_final2 = indiv_level_plot / indiv_level_plot2 + plot_annotation(tag_levels = 'A')
+# 
+# ggsave(here("figure2.png"),
+#        height = 7.5,
+#        width = 7.5)
 
 p_final3 = (plot_var_d_mle + indiv_level_plot) / (plot_pminus_mle + indiv_level_plot2) + plot_annotation(tag_levels = 'A')
 ggsave(here("figure1.png"),
