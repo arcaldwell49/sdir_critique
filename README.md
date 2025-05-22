@@ -1,4 +1,4 @@
-Within this repository are the supplemental materials for a manuscript evaluating the "standard deviation of individual response" (SD_IR_).
+Within this repository are the supplemental materials for a manuscript evaluating the "standard deviation of individual response" (SD~IR~).
 
 In the markdown folder, the Quarto files to produce the supplementary materials files can be located.
 
